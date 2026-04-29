@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Bus } from "lucide-react";
+import { Bus, Wrench } from "lucide-react";
 
 export default function ToshBusPage() {
   return (
@@ -10,9 +10,12 @@ export default function ToshBusPage() {
       </div>
       <Card className="glass-card flex h-96 w-full items-center justify-center">
         <div className="text-center">
-          <Bus className="mx-auto h-16 w-16 text-accent" />
-          <h2 className="mt-4 text-2xl font-semibold text-white">ToshBus Moduli</h2>
-          <p className="mt-2 text-muted-foreground">Bu yerda avtobus va metro yo'nalishlarini qidirish funksiyasi bo'ladi.</p>
+          <div className="relative flex justify-center items-center">
+             <Bus className="mx-auto h-24 w-24 text-accent" />
+             <Wrench className="absolute h-10 w-10 text-yellow-400 -bottom-2 -right-2 animate-pulse" />
+          </div>
+          <h2 className="mt-6 text-2xl font-semibold text-white">Modul Tez Orada Ishga Tushadi</h2>
+          <p className="mt-2 text-muted-foreground max-w-md">"ToshBus" moduli ustida ish olib borilmoqda. Tez orada avtobus va metro yo'nalishlarini qidirish imkoniyati qo'shiladi.</p>
         </div>
       </Card>
     </div>
