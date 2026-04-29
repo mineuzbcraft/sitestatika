@@ -68,9 +68,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const newUsers = [...existingUsers, userData];
       localStorage.setItem('fp_users', JSON.stringify(newUsers));
       toast({
-        title: "Muvaffaqiyatli",
-        description: "Siz ro'yxatdan o'tdingiz. Iltimos, tizimga kiring.",
+        title: "Muvaffaqiyatli!",
+        description: "Siz ro'yxatdan o'tdingiz va tizimga avtomatik kirdingiz.",
       });
+      login(userData);
     } catch (error) {
        toast({
           variant: "destructive",
@@ -78,7 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           description: "Ro'yxatdan o'tishda xatolik yuz berdi.",
         });
     }
-  }, [toast]);
+  }, [toast, login]);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, register }}>
