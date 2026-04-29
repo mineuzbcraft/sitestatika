@@ -74,31 +74,37 @@ export default function AuthForm() {
     },
   });
 
-  const onLoginSubmit = (values: z.infer<typeof loginSchema>) => {
+  const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
     setIsSubmitting(true);
+    
+    let userToLogin: User | null = null;
     if (values.email === 'admin@fuqaro.uz' && values.password === 'Admin123!') {
-      login({ ...values, fullName: 'Admin', district: 'Toshkent', phone: '' });
+      userToLogin = { ...values, password: values.password, confirmPassword: values.password, fullName: 'Admin', district: 'Toshkent', phone: '+998 00 000 00 00' };
     } else {
       const existingUsers: User[] = JSON.parse(localStorage.getItem('fp_users') || '[]');
-      const foundUser = existingUsers.find(u => u.email === values.email && u.password === values.password);
-      if (foundUser) {
-        login(foundUser);
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Xatolik",
-          description: "Email yoki parol noto'g'ri.",
-        });
-      }
+      userToLogin = existingUsers.find(u => u.email === values.email && u.password === values.password) || null;
     }
-    setIsSubmitting(false);
+
+    if (userToLogin) {
+      await login(userToLogin);
+      // after this, the component is unmounted. so we don't need to do anything.
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Xatolik",
+        description: "Email yoki parol noto'g'ri.",
+      });
+      setIsSubmitting(false);
+    }
   };
 
-  const onRegisterSubmit = (values: z.infer<typeof registerSchema>) => {
+  const onRegisterSubmit = async (values: z.infer<typeof registerSchema>) => {
     setIsSubmitting(true);
-    register(values);
-    setIsSubmitting(false);
-    registerForm.reset();
+    const success = await register(values);
+    if (!success) {
+      setIsSubmitting(false);
+    }
+    // if success, we navigated, do nothing more.
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {

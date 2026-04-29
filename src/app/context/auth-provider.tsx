@@ -8,17 +8,17 @@ import type { User } from '@/app/components/auth/auth-form';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (user: User) => void;
-  logout: () => void;
-  register: (user: User) => void;
+  login: (user: User) => Promise<void>;
+  logout: () => Promise<void>;
+  register: (user: User) => Promise<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  login: () => {},
-  logout: () => {},
-  register: () => {},
+  login: async () => {},
+  logout: async () => {},
+  register: async () => false,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -41,20 +41,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  const login = useCallback((userData: User) => {
+  const login = useCallback(async (userData: User) => {
     localStorage.setItem('fp_current_user', JSON.stringify(userData));
     setUser(userData);
     const targetPath = userData.email === 'admin@fuqaro.uz' ? '/dashboard' : '/ariza';
-    router.push(targetPath);
+    await router.push(targetPath);
   }, [router]);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     localStorage.removeItem('fp_current_user');
     setUser(null);
-    router.push('/');
+    await router.push('/');
   }, [router]);
 
-  const register = useCallback((userData: User) => {
+  const register = useCallback(async (userData: User): Promise<boolean> => {
     try {
       const existingUsers: User[] = JSON.parse(localStorage.getItem('fp_users') || '[]');
       if (existingUsers.some(u => u.email === userData.email)) {
@@ -63,21 +63,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           title: "Xatolik",
           description: "Bu email bilan ro'yxatdan o'tilgan.",
         });
-        return;
+        return false;
       }
       const newUsers = [...existingUsers, userData];
       localStorage.setItem('fp_users', JSON.stringify(newUsers));
       toast({
         title: "Muvaffaqiyatli!",
-        description: "Siz ro'yxatdan o'tdingiz va tizimga avtomatik kirdingiz.",
+        description: "Siz muvaffaqiyatli ro'yxatdan o'tdingiz. Profilingizga yo'naltirilmoqda...",
       });
-      login(userData);
+      await login(userData);
+      return true;
     } catch (error) {
        toast({
           variant: "destructive",
           title: "Xatolik",
           description: "Ro'yxatdan o'tishda xatolik yuz berdi.",
         });
+        return false;
     }
   }, [toast, login]);
 
