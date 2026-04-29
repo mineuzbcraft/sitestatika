@@ -15,13 +15,10 @@ const DoriInfoInputSchema = z.object({
 });
 export type DoriInfoInput = z.infer<typeof DoriInfoInputSchema>;
 
+// Simplified output schema
 const DoriInfoOutputSchema = z.object({
   found: z.boolean().describe("Whether information for the medicine was found."),
-  name: z.string().describe("The name of the medicine."),
-  description: z.string().describe("A general description of the medicine."),
-  usage: z.string().describe("Instructions on how to use the medicine."),
-  sideEffects: z.string().describe("Potential side effects of the medicine."),
-  contraindications: z.string().describe("When not to use the medicine (contraindications)."),
+  info: z.string().describe("A markdown-formatted string containing the medicine's information, or an empty string if not found."),
 });
 export type DoriInfoOutput = z.infer<typeof DoriInfoOutputSchema>;
 
@@ -33,16 +30,16 @@ const doriInfoPrompt = ai.definePrompt({
   name: 'doriInfoPrompt',
   input: { schema: DoriInfoInputSchema },
   output: { schema: DoriInfoOutputSchema },
-  prompt: `Siz farmatsevt bo'yicha mutaxassissiz. Sizga dori nomi beriladi va siz shu dori haqida batafsil ma'lumot taqdim etishingiz kerak. Agar dori topilmasa, "found" maydonini 'false' qilib, boshqa maydonlarni bo'sh qoldiring. Agar topilsa, "found" maydonini 'true' qiling va quyidagi ma'lumotlarni O'zbek tilida, ilmiy va tushunarli tilda taqdim eting:
+  prompt: `Siz farmatsevt bo'yicha mutaxassissiz. Sizga dori nomi beriladi va siz shu dori haqida batafsil ma'lumot taqdim etishingiz kerak. 
+Agar dori topilmasa, "found" maydonini 'false' qilib, "info" maydonini bo'sh qoldiring.
+Agar topilsa, "found" maydonini 'true' qiling va dori haqidagi ma'lumotni "info" maydoniga Markdown formatida, O'zbek tilida, ilmiy va tushunarli tilda yozib bering.
+Ma'lumot quyidagilarni o'z ichiga olsin:
+- **Umumiy tavsif**
+- **Qo'llanilishi**
+- **Nojo'ya ta'sirlari**
+- **Qo'llash mumkin bo'lmagan holatlar**
 
 Dori nomi: {{{medicineName}}}
-
-Javobingizni quyidagi formatda tuzing:
-- Dori nomi (name)
-- Umumiy tavsif (description)
-- Qo'llanilishi (usage)
-- Nojo'ya ta'sirlari (sideEffects)
-- Qo'llash mumkin bo'lmagan holatlar (contraindications)
 `,
 });
 
@@ -55,7 +52,7 @@ const doriInfoFlow = ai.defineFlow(
   async (input) => {
     const { output } = await doriInfoPrompt(input);
     if (!output) {
-      throw new Error('Failed to get medicine information.');
+      return { found: false, info: '' };
     }
     return output;
   }

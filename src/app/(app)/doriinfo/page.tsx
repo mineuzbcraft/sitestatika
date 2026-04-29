@@ -12,8 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Loader2, Pill, Search, Info, AlertTriangle, ShieldOff, HeartPulse } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Loader2, Pill, Search, Info, AlertTriangle } from 'lucide-react';
 
 const searchSchema = z.object({
   medicineName: z.string().min(1, 'Iltimos, dori nomini kiriting.'),
@@ -44,6 +43,7 @@ export default function DoriInfoPage() {
     if (result.success && result.data) {
       setSearchResult(result.data);
     } else {
+      setSearchResult(null);
       toast({
         variant: 'destructive',
         title: 'Xatolik',
@@ -55,7 +55,7 @@ export default function DoriInfoPage() {
   const ResultDisplay = () => {
     if (isLoading) {
       return (
-        <div className="flex flex-col items-center justify-center text-center text-muted-foreground glass-card p-8 rounded-lg">
+        <div className="flex flex-col items-center justify-center text-center text-muted-foreground glass-card p-8 rounded-lg min-h-[300px]">
           <Loader2 className="h-12 w-12 animate-spin text-accent mb-4" />
           <p className="text-lg">Qidirilmoqda...</p>
         </div>
@@ -64,7 +64,7 @@ export default function DoriInfoPage() {
 
     if (!hasSearched) {
         return (
-            <div className="text-center text-muted-foreground glass-card p-8 rounded-lg">
+            <div className="text-center text-muted-foreground glass-card p-8 rounded-lg min-h-[300px] flex flex-col justify-center items-center">
                 <Pill className="mx-auto h-16 w-16 text-accent" />
                 <h2 className="mt-4 text-2xl font-semibold text-white">Dori-Info Moduli</h2>
                 <p className="mt-2">Qidirmoqchi bo'lgan dori nomini kiriting va ma'lumot oling.</p>
@@ -72,53 +72,23 @@ export default function DoriInfoPage() {
         );
     }
     
-    if (searchResult) {
+    if (searchResult && searchResult.found) {
       return (
         <Card className="glass-card">
           <CardHeader>
-            <CardTitle className="text-3xl text-accent">{searchResult.name}</CardTitle>
-            <CardDescription>{searchResult.description}</CardDescription>
+            <CardTitle className="text-3xl text-accent">{form.getValues("medicineName")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>
-                    <div className="flex items-center gap-2">
-                        <HeartPulse className="h-5 w-5"/> Qo'llanilishi
-                    </div>
-                </AccordionTrigger>
-                <AccordionContent className="prose prose-invert max-w-none">
-                  {searchResult.usage}
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger>
-                    <div className="flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5"/> Nojo'ya ta'sirlari
-                    </div>
-                </AccordionTrigger>
-                <AccordionContent className="prose prose-invert max-w-none">
-                  {searchResult.sideEffects}
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-3">
-                <AccordionTrigger>
-                    <div className="flex items-center gap-2">
-                        <ShieldOff className="h-5 w-5"/> Qo'llash mumkin bo'lmagan holatlar
-                    </div>
-                </AccordionTrigger>
-                <AccordionContent className="prose prose-invert max-w-none">
-                  {searchResult.contraindications}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+             <div className="whitespace-pre-wrap text-base">
+                {searchResult.info}
+             </div>
           </CardContent>
         </Card>
       );
     }
 
     return (
-        <div className="text-center text-muted-foreground glass-card p-8 rounded-lg">
+        <div className="text-center text-muted-foreground glass-card p-8 rounded-lg min-h-[300px] flex flex-col justify-center items-center">
             <Info className="mx-auto h-16 w-16 text-primary" />
             <h2 className="mt-4 text-2xl font-semibold text-white">Ma'lumot topilmadi</h2>
             <p className="mt-2">Boshqa dori nomini qidirib ko'ring.</p>
