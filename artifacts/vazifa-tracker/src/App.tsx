@@ -409,6 +409,11 @@ export default function App() {
         onClose={() => setLoginOpen(false)}
       />
 
+      <AdminSettings
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
+
       {admin && (
         <MajmuaModal
           open={modalOpen}

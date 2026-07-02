@@ -7,6 +7,7 @@
   packages = [
     pkgs.nodejs_22
     pkgs.zulu
+    pkgs.pnpm
   ];
   # Sets environment variables in the workspace
   env = {};
@@ -26,7 +27,7 @@
     workspace = {
       onCreate = {
         default.openFiles = [
-          "src/app/page.tsx"
+          "artifacts/vazifa-tracker/src/App.tsx"
         ];
       };
     };
@@ -35,7 +36,7 @@
       enable = true;
       previews = {
         web = {
-          command = ["npm" "run" "dev" "--" "--port" "$PORT" "--hostname" "0.0.0.0"];
+          command = ["pnpm", "--filter", "@workspace/vazifa-tracker", "dev", "--", "--port", "$PORT", "--hostname", "0.0.0.0"];
           manager = "web";
         };
       };

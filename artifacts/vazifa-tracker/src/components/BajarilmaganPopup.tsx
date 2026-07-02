@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X, FileText, Download, Building2, Upload, Trash2, CheckCircle2, Circle, BookOpen } from "lucide-react";
+import { X, FileText, Download, Building2, Upload, Trash2, CheckCircle2, Circle, BookOpen, Edit } from "lucide-react";
 import type { Majmua, Vazifa } from "../types";
 import { foizHisoblash, rangAniqla, RANG_STYLES } from "../utils/foiz";
 import jsPDF from "jspdf";
@@ -17,6 +17,7 @@ export default function BajarilmaganPopup({ open, majmua, isAdmin, onClose, onUp
   const [local, setLocal] = useState<Majmua | null>(null);
   const [editingManba, setEditingManba] = useState<string | null>(null);
   const [batafsliVazifa, setBatafsliVazifa] = useState<Vazifa | null>(null);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const pdfRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
@@ -196,7 +197,8 @@ export default function BajarilmaganPopup({ open, majmua, isAdmin, onClose, onUp
                     onPdfRemove={() => updateVazifa(v.id, { pdf: null, pdfNomi: undefined })}
                     onPdfOpen={() => v.pdf && openPdf(v.pdf)}
                     onPdfDownload={() => v.pdf && downloadPdf(v.pdf, v.pdfNomi || `${v.nomi}.pdf`)}
-                    onBatafsil={() => setBatafsliVazifa(v)}
+                    onBatafsil={() => { setBatafsliVazifa(v); setIsEditing(false); }}
+                    onEdit={() => { setBatafsliVazifa(v); setIsEditing(true); }}
                     pdfRef={(el) => { pdfRefs.current[v.id] = el; }}
                     triggerPdfUpload={() => pdfRefs.current[v.id]?.click()}
                   />
@@ -225,6 +227,7 @@ export default function BajarilmaganPopup({ open, majmua, isAdmin, onClose, onUp
         majmuaNomi={local.nomi}
         masul={local.masul}
         isAdmin={isAdmin}
+        isEditing={isEditing}
         onUpdate={(updated) => updateVazifa(updated.id, updated)}
         onClose={() => setBatafsliVazifa(null)}
       />
@@ -247,6 +250,7 @@ interface TaskCardProps {
   onPdfOpen: () => void;
   onPdfDownload: () => void;
   onBatafsil: () => void;
+  onEdit: () => void;
   pdfRef: (el: HTMLInputElement | null) => void;
   triggerPdfUpload: () => void;
 }
@@ -255,7 +259,7 @@ function TaskCard({
   vazifa, idx, majmuaNomi, masul, isAdmin,
   editingManba, setEditingManba,
   onToggle, onManbaChange, onPdfUpload, onPdfRemove,
-  onPdfOpen, onPdfDownload, onBatafsil,
+  onPdfOpen, onPdfDownload, onBatafsil, onEdit,
   pdfRef, triggerPdfUpload,
 }: TaskCardProps) {
   const xarajatJami = (vazifa.xarajatlar || []).reduce((a, x) => a + x.summa, 0);
@@ -298,11 +302,21 @@ function TaskCard({
           {/* Batafsil ko'rish button */}
           <button
             onClick={onBatafsil}
-            className="flex items-center gap-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-semibold transition-colors"
           >
             <BookOpen size={12} />
-            Batafsil
+            Batafsil ko'rish
           </button>
+          
+          {isAdmin && (
+            <button
+              onClick={onEdit}
+              className="flex items-center gap-1 px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold transition-colors"
+            >
+              <Edit size={12} />
+              Tahrirlash
+            </button>
+          )}
 
           {/* PDF Ko'rish */}
           {vazifa.pdf ? (

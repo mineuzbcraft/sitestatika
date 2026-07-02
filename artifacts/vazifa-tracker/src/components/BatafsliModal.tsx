@@ -8,6 +8,7 @@ interface Props {
   majmuaNomi: string;
   masul: string;
   isAdmin: boolean;
+  isEditing: boolean;
   onUpdate: (v: Vazifa) => void;
   onClose: () => void;
 }
@@ -25,7 +26,7 @@ interface EditRow {
   izoh: string;
 }
 
-export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin, onUpdate, onClose }: Props) {
+export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin, isEditing, onUpdate, onClose }: Props) {
   const [nomi, setNomi] = useState("");
   const [manba, setManba] = useState("");
   const [batafsil, setBatafsil] = useState("");
@@ -43,8 +44,15 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
       setXarajatlar(vazifa.xarajatlar || []);
       setEditingId(null);
       setAddingNew(false);
+    } else {
+      setNomi("");
+      setManba("");
+      setBatafsil("");
+      setXarajatlar([]);
+      setEditingId(null);
+      setAddingNew(false);
     }
-  }, [vazifa, open]);
+  }, [vazifa]);
 
   if (!open || !vazifa) return null;
 
@@ -55,6 +63,7 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
 
   function saveInfo() {
     save({ nomi, manba, batafsil, xarajatlar });
+    onClose();
   }
 
   function startEdit(x: Xarajat) {
@@ -72,7 +81,6 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
     );
     setXarajatlar(updated);
     setEditingId(null);
-    save({ xarajatlar: updated });
   }
 
   function cancelEdit() {
@@ -82,7 +90,6 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
   function deleteRow(id: string) {
     const updated = xarajatlar.filter(x => x.id !== id);
     setXarajatlar(updated);
-    save({ xarajatlar: updated });
   }
 
   function startAdd() {
@@ -98,7 +105,6 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
     setXarajatlar(updated);
     setAddingNew(false);
     setNewRow({ id: uid(), sana: today(), summa: "", izoh: "" });
-    save({ xarajatlar: updated });
   }
 
   function cancelAdd() {
@@ -111,8 +117,6 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
     return n.toLocaleString("uz-UZ") + " so'm";
   }
 
-  const infoChanged = nomi !== (vazifa.nomi) || manba !== (vazifa.manba || "") || batafsil !== (vazifa.batafsil || "");
-
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
@@ -122,9 +126,9 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <FileText size={16} className="text-blue-300 flex-shrink-0" />
-              <p className="text-xs text-blue-300">Batafsil ma'lumot</p>
+              <p className="text-xs text-blue-300">{isEditing ? "Vazifani tahrirlash" : "Batafsil ma'lumot"}</p>
             </div>
-            {isAdmin ? (
+            {isEditing && isAdmin ? (
               <input
                 value={nomi}
                 onChange={e => setNomi(e.target.value)}
@@ -148,7 +152,7 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Manba</label>
-                {isAdmin ? (
+                {isEditing && isAdmin ? (
                   <input
                     value={manba}
                     onChange={e => setManba(e.target.value)}
@@ -169,7 +173,7 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
 
             <div>
               <label className="block text-xs text-gray-500 mb-1">Batafsil izoh</label>
-              {isAdmin ? (
+              {isEditing && isAdmin ? (
                 <textarea
                   value={batafsil}
                   onChange={e => setBatafsil(e.target.value)}
@@ -183,16 +187,6 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
                 </p>
               )}
             </div>
-
-            {isAdmin && infoChanged && (
-              <button
-                onClick={saveInfo}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-colors"
-              >
-                <Save size={13} />
-                O'zgarishlarni saqlash
-              </button>
-            )}
           </div>
 
           {/* Xarajatlar tarixi */}
@@ -207,7 +201,7 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
                   </span>
                 )}
               </div>
-              {isAdmin && !addingNew && (
+              {isEditing && isAdmin && !addingNew && (
                 <button
                   onClick={startAdd}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-semibold transition-colors"
@@ -218,11 +212,11 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
               )}
             </div>
 
-            {xarajatlar.length === 0 && !addingNew ? (
+            {(xarajatlar.length === 0 && !addingNew) ? (
               <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
                 <TrendingUp size={28} className="text-gray-300 mx-auto mb-2" />
                 <p className="text-sm text-gray-400">Hali xarajat qo'shilmagan</p>
-                {isAdmin && (
+                {isEditing && isAdmin && (
                   <button onClick={startAdd} className="mt-3 text-blue-600 text-xs underline hover:text-blue-800">
                     Birinchi xarajatni qo'shish
                   </button>
@@ -237,7 +231,7 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
                       <th className="px-3 py-2.5 text-left text-xs font-bold w-28">Sana</th>
                       <th className="px-3 py-2.5 text-right text-xs font-bold w-32">Summa (so'm)</th>
                       <th className="px-3 py-2.5 text-left text-xs font-bold">Izoh</th>
-                      {isAdmin && <th className="px-3 py-2.5 text-center text-xs font-bold w-20">Amal</th>}
+                      {isEditing && isAdmin && <th className="px-3 py-2.5 text-center text-xs font-bold w-20">Amal</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -290,7 +284,7 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
                             {x.summa.toLocaleString("uz-UZ")}
                           </td>
                           <td className="px-3 py-2.5 text-xs text-gray-700">{x.izoh || <span className="text-gray-400 italic">—</span>}</td>
-                          {isAdmin && (
+                          {isEditing && isAdmin && (
                             <td className="px-3 py-2.5">
                               <div className="flex items-center justify-center gap-1">
                                 <button onClick={() => startEdit(x)} className="p-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition-colors">
@@ -355,13 +349,13 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
                   {xarajatlar.length > 0 && (
                     <tfoot>
                       <tr className="bg-blue-50 border-t-2 border-blue-200">
-                        <td colSpan={isAdmin ? 2 : 2} className="px-3 py-2.5 text-xs font-bold text-blue-800">
+                        <td colSpan={isEditing && isAdmin ? 2 : 2} className="px-3 py-2.5 text-xs font-bold text-blue-800">
                           Jami xarajat
                         </td>
                         <td className="px-3 py-2.5 text-sm font-bold text-blue-800 text-right">
                           {totalSumma.toLocaleString("uz-UZ")}
                         </td>
-                        <td colSpan={isAdmin ? 2 : 1} className="px-3 py-2.5 text-xs text-blue-600">
+                        <td colSpan={isEditing && isAdmin ? 2 : 1} className="px-3 py-2.5 text-xs text-blue-600">
                           {formatSum(totalSumma)}
                         </td>
                       </tr>
@@ -373,12 +367,20 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+          {isEditing && isAdmin && (
+            <button
+              onClick={saveInfo}
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-colors"
+            >
+              Saqlash
+            </button>
+          )}
           <button
             onClick={onClose}
             className="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition-colors"
           >
-            Yopish
+            {isEditing && isAdmin ? "Bekor qilish" : "Yopish"}
           </button>
         </div>
       </div>
