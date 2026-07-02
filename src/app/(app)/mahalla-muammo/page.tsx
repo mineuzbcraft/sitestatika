@@ -40,6 +40,27 @@ export type Problem = {
   user: string;
 };
 
+const DEFAULT_PROBLEMS: Problem[] = [
+    {
+        id: '1',
+        district: 'Yunusobod',
+        type: 'Yo\'l ta\'miri',
+        description: 'Yunusobod 11-mavzesidagi ichki yo\'llar o\'ta yomon ahvolda, chuqurliklar juda ko\'p.',
+        status: 'Ko\'rib chiqilmoqda',
+        submittedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+        user: 'Alisher Fayziyev'
+    },
+    {
+        id: '2',
+        district: 'Chilonzor',
+        type: 'Chiqindilarni olib ketish',
+        description: 'Chilonzor 3-mavzesida chiqindilar 3 kundan beri olib ketilmadi. Antisanitariya holati yuzaga kelmoqda.',
+        status: 'Yangi',
+        submittedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+        user: 'Zilola Ahmedova'
+    }
+];
+
 export default function MahallaMuammoPage() {
   const mapImage = PlaceHolderImages.find(img => img.id === 'tashkent-map');
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -49,15 +70,18 @@ export default function MahallaMuammoPage() {
   const isAdmin = user?.email === 'admin@fuqaro.uz';
 
   useEffect(() => {
-    // This is to avoid hydration errors
     setLoading(true);
     try {
       const storedProblems = localStorage.getItem('fp_problems');
       if (storedProblems) {
         setProblems(JSON.parse(storedProblems));
+      } else {
+        setProblems(DEFAULT_PROBLEMS);
+        localStorage.setItem('fp_problems', JSON.stringify(DEFAULT_PROBLEMS));
       }
     } catch (error) {
       console.error("Failed to parse problems from localStorage", error);
+      setProblems(DEFAULT_PROBLEMS);
     } finally {
       setLoading(false);
     }

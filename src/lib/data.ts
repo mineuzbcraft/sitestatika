@@ -109,5 +109,40 @@ export const universities: University[] = [
         minScore: 115,
         subjects: ["Matematika", "Ingliz tili"],
         imageUrl: "https://picsum.photos/seed/tsue/400/200"
+    },
+    {
+        name: "Inha Universiteti Toshkentda",
+        description: "Axborot texnologiyalari va logistika bo'yicha Janubiy Koreya andozalari.",
+        minScore: 130,
+        subjects: ["Matematika", "Fizika", "Ingliz tili"],
+        imageUrl: "https://picsum.photos/seed/inha/400/200"
+    },
+    {
+        name: "Toshkent Davlat Sharqshunoslik Universiteti",
+        description: "Sharq tillari va madaniyatini o'rganish bo'yicha markaz.",
+        minScore: 105,
+        subjects: ["Tarix", "Ingliz tili", "Ona tili va adabiyoti"],
+        imageUrl: "https://picsum.photos/seed/tshu/400/200"
     }
+];
+
+export const busRoutes = [
+  { id: '1', number: '1', route: 'Oloy bozori - Yunusobod 19-dahala', type: 'Avtobus' },
+  { id: '2', number: '2', route: 'Eshonqulov - Toshkent vokzali', type: 'Avtobus' },
+  { id: '3', number: '14', route: 'Chorsu bozori - TTTU', type: 'Avtobus' },
+  { id: '4', number: '24', route: 'Yunusobod - O\'rikzor', type: 'Avtobus' },
+  { id: '5', number: '51', route: 'Chilonzor 25-kvartal - Toshkent vokzali', type: 'Avtobus' },
+  { id: '6', number: '72', route: 'Mirobod - Qoraqamish 2/4', type: 'Avtobus' },
+  { id: '7', number: '93', route: 'Qo\'yliq bozori - Sergeli 7', type: 'Avtobus' },
+  { id: '8', number: '110', route: 'TTZ - Oloy bozori', type: 'Avtobus' },
+];
+
+export const metroStations = [
+  { name: 'Paxtakor', line: 'Chilonzor', status: 'Ishlamoqda' },
+  { name: 'Amir Temur xiyoboni', line: 'Chilonzor', status: 'Ishlamoqda' },
+  { name: 'Chorsu', line: 'O\'zbekiston', status: 'Ishlamoqda' },
+  { name: 'Bodomzor', line: 'Yunusobod', status: 'Ishlamoqda' },
+  { name: 'Yunus Rajabiy', line: 'Yunusobod', status: 'Ishlamoqda' },
+  { name: 'Buyuk Ipak Yo\'li', line: 'Chilonzor', status: 'Ishlamoqda' },
+  { name: 'Olmazor', line: 'Chilonzor', status: 'Ishlamoqda' },
 ];
