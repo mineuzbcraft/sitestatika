@@ -36,7 +36,7 @@
       enable = true;
       previews = {
         web = {
-          command = ["pnpm", "--filter", "@workspace/vazifa-tracker", "dev", "--", "--port", "$PORT", "--hostname", "0.0.0.0"];
+          command = ["sh" "-c" "BASE_PATH=/ PORT=$PORT pnpm --filter @workspace/vazifa-tracker dev -- --port $PORT --hostname 0.0.0.0"];
           manager = "web";
         };
       };

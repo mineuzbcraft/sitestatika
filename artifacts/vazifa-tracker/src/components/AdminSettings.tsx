@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { X, Key, Save, Shield } from 'lucide-react';
-import { ADMIN_PASSWORD_KEY, ADMIN_USERNAME_KEY } from '../utils/auth';
+import { X, Save, Shield } from 'lucide-react';
+import { getAdminUsername, updateCredentials, login } from '../utils/auth';
 
 interface Props {
   open: boolean;
@@ -10,15 +10,15 @@ interface Props {
 export default function AdminSettings({ open, onClose }: Props) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [newUsername, setNewUsername] = useState(localStorage.getItem(ADMIN_USERNAME_KEY) || 'admin');
+  const [newUsername, setNewUsername] = useState(getAdminUsername());
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   if (!open) return null;
 
   const handleSave = () => {
-    const storedPassword = localStorage.getItem(ADMIN_PASSWORD_KEY);
-    if (currentPassword !== storedPassword) {
+    // Validate current password by trying to log in with it
+    if (!login(getAdminUsername(), currentPassword)) {
       setError('Joriy parol xato!');
       setSuccess('');
       return;
@@ -30,8 +30,8 @@ export default function AdminSettings({ open, onClose }: Props) {
       return;
     }
 
-    localStorage.setItem(ADMIN_PASSWORD_KEY, newPassword);
-    localStorage.setItem(ADMIN_USERNAME_KEY, newUsername);
+    // Update credentials using the function from auth.ts
+    updateCredentials(newUsername, newPassword);
     setError('');
     setSuccess('Parol va foydalanuvchi nomi muvaffaqiyatli o\'zgartirildi!');
     setCurrentPassword('');
@@ -76,7 +76,7 @@ export default function AdminSettings({ open, onClose }: Props) {
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Yangi parol</ol>
+            <label className="block text-xs text-gray-500 mb-1">Yangi parol</label>
             <input
               type="password"
               value={newPassword}
