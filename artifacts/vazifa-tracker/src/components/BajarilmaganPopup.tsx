@@ -5,6 +5,8 @@ import { foizHisoblash, rangAniqla, RANG_STYLES } from "../utils/foiz";
 import jsPDF from "jspdf";
 import BatafsliModal from "./BatafsliModal";
 
+const MOLIYAVIY_MASULLAR = ['A.Azimov', 'S.Abdikarimov', 'N.Ismatov'];
+
 interface Props {
   open: boolean;
   majmua: Majmua | null;
@@ -28,6 +30,8 @@ export default function BajarilmaganPopup({ open, majmua, isAdmin, onClose, onUp
   }, [majmua, open]);
 
   if (!open || !majmua || !local) return null;
+
+  const isMoliyaviy = MOLIYAVIY_MASULLAR.includes(local.masul);
 
   const notDone = local.vazifalar.filter(v => !v.bajarildi);
   const jami = local.vazifalar.length;
@@ -124,7 +128,7 @@ export default function BajarilmaganPopup({ open, majmua, isAdmin, onClose, onUp
       }
 
       const xSum = (v.xarajatlar || []).reduce((a, x) => a + x.summa, 0);
-      if (xSum > 0) {
+      if (isMoliyaviy && xSum > 0) {
         pdf.setTextColor(30, 100, 200);
         pdf.text(`Jami xarajat: ${xSum.toLocaleString("uz-UZ")} so'm`, margin + 13, y + (v.batafsil ? 35 : 28));
       }
@@ -189,6 +193,7 @@ export default function BajarilmaganPopup({ open, majmua, isAdmin, onClose, onUp
                     majmuaNomi={local.nomi}
                     masul={local.masul}
                     isAdmin={isAdmin}
+                    isMoliyaviy={isMoliyaviy}
                     editingManba={editingManba}
                     setEditingManba={setEditingManba}
                     onToggle={() => toggleDone(v.id)}
@@ -241,6 +246,7 @@ interface TaskCardProps {
   majmuaNomi: string;
   masul: string;
   isAdmin: boolean;
+  isMoliyaviy: boolean;
   editingManba: string | null;
   setEditingManba: (id: string | null) => void;
   onToggle: () => void;
@@ -256,7 +262,7 @@ interface TaskCardProps {
 }
 
 function TaskCard({
-  vazifa, idx, majmuaNomi, masul, isAdmin,
+  vazifa, idx, majmuaNomi, masul, isAdmin, isMoliyaviy,
   editingManba, setEditingManba,
   onToggle, onManbaChange, onPdfUpload, onPdfRemove,
   onPdfOpen, onPdfDownload, onBatafsil, onEdit,
@@ -360,7 +366,7 @@ function TaskCard({
             <span className="text-gray-400">Mas'ul shaxs:</span>
             <span className="font-bold text-blue-700">{masul}</span>
           </div>
-          {xarajatJami > 0 && (
+          {isMoliyaviy && xarajatJami > 0 && (
             <div className="flex gap-1.5">
               <span className="text-gray-400">Jami xarajat:</span>
               <span className="font-bold text-blue-700">{xarajatJami.toLocaleString("uz-UZ")} so'm</span>

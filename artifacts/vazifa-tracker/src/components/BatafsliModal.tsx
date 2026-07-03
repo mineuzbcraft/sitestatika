@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { X, Plus, Edit2, Trash2, Save, XCircle, FileText, TrendingUp } from "lucide-react";
 import type { Vazifa, Xarajat } from "../types";
 
+const MOLIYAVIY_MASULLAR = ['A.Azimov', 'S.Abdikarimov', 'N.Ismatov'];
+
 interface Props {
   open: boolean;
   vazifa: Vazifa | null;
@@ -35,6 +37,8 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
   const [editRow, setEditRow] = useState<EditRow>({ id: "", sana: "", summa: "", izoh: "" });
   const [addingNew, setAddingNew] = useState(false);
   const [newRow, setNewRow] = useState<EditRow>({ id: "", sana: today(), summa: "", izoh: "" });
+
+  const isMoliyaviy = MOLIYAVIY_MASULLAR.includes(masul);
 
   useEffect(() => {
     if (vazifa) {
@@ -189,182 +193,184 @@ export default function BatafsliModal({ open, vazifa, majmuaNomi, masul, isAdmin
             </div>
           </div>
 
-          {/* Xarajatlar tarixi */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <TrendingUp size={16} className="text-blue-600" />
-                <p className="text-sm font-bold text-gray-800">Xarajatlar tarixi</p>
-                {xarajatlar.length > 0 && (
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">
-                    {xarajatlar.length} ta
-                  </span>
-                )}
-              </div>
-              {isEditing && isAdmin && !addingNew && (
-                <button
-                  onClick={startAdd}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-semibold transition-colors"
-                >
-                  <Plus size={13} />
-                  Yangi xarajat
-                </button>
-              )}
-            </div>
-
-            {(xarajatlar.length === 0 && !addingNew) ? (
-              <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                <TrendingUp size={28} className="text-gray-300 mx-auto mb-2" />
-                <p className="text-sm text-gray-400">Hali xarajat qo'shilmagan</p>
-                {isEditing && isAdmin && (
-                  <button onClick={startAdd} className="mt-3 text-blue-600 text-xs underline hover:text-blue-800">
-                    Birinchi xarajatni qo'shish
+          {/* Xarajatlar tarixi (conditional) */}
+          {isMoliyaviy && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <TrendingUp size={16} className="text-blue-600" />
+                  <p className="text-sm font-bold text-gray-800">Xarajatlar tarixi</p>
+                  {xarajatlar.length > 0 && (
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">
+                      {xarajatlar.length} ta
+                    </span>
+                  )}
+                </div>
+                {isEditing && isAdmin && !addingNew && (
+                  <button
+                    onClick={startAdd}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-semibold transition-colors"
+                  >
+                    <Plus size={13} />
+                    Yangi xarajat
                   </button>
                 )}
               </div>
-            ) : (
-              <div className="rounded-xl overflow-hidden border border-gray-200">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-gray-100 text-gray-600">
-                      <th className="px-3 py-2.5 text-left text-xs font-bold w-8">#</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-bold w-28">Sana</th>
-                      <th className="px-3 py-2.5 text-right text-xs font-bold w-32">Summa (so'm)</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-bold">Izoh</th>
-                      {isEditing && isAdmin && <th className="px-3 py-2.5 text-center text-xs font-bold w-20">Amal</th>}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {xarajatlar.map((x, idx) => (
-                      editingId === x.id ? (
-                        <tr key={x.id} className="bg-blue-50 border-t border-gray-200">
-                          <td className="px-3 py-2 text-xs text-gray-500">{idx + 1}</td>
+
+              {(xarajatlar.length === 0 && !addingNew) ? (
+                <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                  <TrendingUp size={28} className="text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">Hali xarajat qo'shilmagan</p>
+                  {isEditing && isAdmin && (
+                    <button onClick={startAdd} className="mt-3 text-blue-600 text-xs underline hover:text-blue-800">
+                      Birinchi xarajatni qo'shish
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-xl overflow-hidden border border-gray-200">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-100 text-gray-600">
+                        <th className="px-3 py-2.5 text-left text-xs font-bold w-8">#</th>
+                        <th className="px-3 py-2.5 text-left text-xs font-bold w-28">Sana</th>
+                        <th className="px-3 py-2.5 text-right text-xs font-bold w-32">Summa (so'm)</th>
+                        <th className="px-3 py-2.5 text-left text-xs font-bold">Izoh</th>
+                        {isEditing && isAdmin && <th className="px-3 py-2.5 text-center text-xs font-bold w-20">Amal</th>}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {xarajatlar.map((x, idx) => (
+                        editingId === x.id ? (
+                          <tr key={x.id} className="bg-blue-50 border-t border-gray-200">
+                            <td className="px-3 py-2 text-xs text-gray-500">{idx + 1}</td>
+                            <td className="px-3 py-2">
+                              <input
+                                type="date"
+                                value={editRow.sana}
+                                onChange={e => setEditRow(r => ({ ...r, sana: e.target.value }))}
+                                className="w-full border border-blue-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                            </td>
+                            <td className="px-3 py-2">
+                              <input
+                                type="number"
+                                value={editRow.summa}
+                                onChange={e => setEditRow(r => ({ ...r, summa: e.target.value }))}
+                                placeholder="0"
+                                className="w-full border border-blue-300 rounded px-2 py-1 text-xs text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                            </td>
+                            <td className="px-3 py-2">
+                              <input
+                                type="text"
+                                value={editRow.izoh}
+                                onChange={e => setEditRow(r => ({ ...r, izoh: e.target.value }))}
+                                placeholder="Izoh..."
+                                className="w-full border border-blue-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="flex items-center justify-center gap-1">
+                                <button onClick={saveEdit} className="p-1 bg-green-100 hover:bg-green-200 text-green-700 rounded" title="Saqlash">
+                                  <Save size={13} />
+                                </button>
+                                <button onClick={cancelEdit} className="p-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded" title="Bekor">
+                                  <XCircle size={13} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : (
+                          <tr key={x.id} className="border-t border-gray-200 hover:bg-gray-50 transition-colors">
+                            <td className="px-3 py-2.5 text-xs text-gray-500">{idx + 1}</td>
+                            <td className="px-3 py-2.5 text-xs text-gray-600">{x.sana}</td>
+                            <td className="px-3 py-2.5 text-xs text-right font-semibold text-gray-800">
+                              {x.summa.toLocaleString("uz-UZ")}
+                            </td>
+                            <td className="px-3 py-2.5 text-xs text-gray-700">{x.izoh || <span className="text-gray-400 italic">—</span>}</td>
+                            {isEditing && isAdmin && (
+                              <td className="px-3 py-2.5">
+                                <div className="flex items-center justify-center gap-1">
+                                  <button onClick={() => startEdit(x)} className="p-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition-colors">
+                                    <Edit2 size={12} />
+                                  </button>
+                                  <button onClick={() => deleteRow(x.id)} className="p-1 bg-red-100 hover:bg-red-200 text-red-600 rounded transition-colors">
+                                    <Trash2 size={12} />
+                                  </button>
+                                </div>
+                              </td>
+                            )}
+                          </tr>
+                        )
+                      ))}
+
+                      {/* Add new row */}
+                      {addingNew && (
+                        <tr className="border-t border-gray-200 bg-green-50">
+                          <td className="px-3 py-2 text-xs text-gray-400">—</td>
                           <td className="px-3 py-2">
                             <input
                               type="date"
-                              value={editRow.sana}
-                              onChange={e => setEditRow(r => ({ ...r, sana: e.target.value }))}
-                              className="w-full border border-blue-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              value={newRow.sana}
+                              onChange={e => setNewRow(r => ({ ...r, sana: e.target.value }))}
+                              className="w-full border border-green-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-green-500"
                             />
                           </td>
                           <td className="px-3 py-2">
                             <input
                               type="number"
-                              value={editRow.summa}
-                              onChange={e => setEditRow(r => ({ ...r, summa: e.target.value }))}
+                              value={newRow.summa}
+                              onChange={e => setNewRow(r => ({ ...r, summa: e.target.value }))}
                               placeholder="0"
-                              className="w-full border border-blue-300 rounded px-2 py-1 text-xs text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              autoFocus
+                              className="w-full border border-green-300 rounded px-2 py-1 text-xs text-right focus:outline-none focus:ring-1 focus:ring-green-500"
                             />
                           </td>
                           <td className="px-3 py-2">
                             <input
                               type="text"
-                              value={editRow.izoh}
-                              onChange={e => setEditRow(r => ({ ...r, izoh: e.target.value }))}
-                              placeholder="Izoh..."
-                              className="w-full border border-blue-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              value={newRow.izoh}
+                              onChange={e => setNewRow(r => ({ ...r, izoh: e.target.value }))}
+                              placeholder="Izoh (masalan: transport, ta'minat...)"
+                              className="w-full border border-green-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-green-500"
                             />
                           </td>
                           <td className="px-3 py-2">
                             <div className="flex items-center justify-center gap-1">
-                              <button onClick={saveEdit} className="p-1 bg-green-100 hover:bg-green-200 text-green-700 rounded" title="Saqlash">
+                              <button onClick={saveNew} disabled={!newRow.summa} className="p-1 bg-green-200 hover:bg-green-300 text-green-700 rounded disabled:opacity-40">
                                 <Save size={13} />
                               </button>
-                              <button onClick={cancelEdit} className="p-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded" title="Bekor">
+                              <button onClick={cancelAdd} className="p-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded">
                                 <XCircle size={13} />
                               </button>
                             </div>
                           </td>
                         </tr>
-                      ) : (
-                        <tr key={x.id} className="border-t border-gray-200 hover:bg-gray-50 transition-colors">
-                          <td className="px-3 py-2.5 text-xs text-gray-500">{idx + 1}</td>
-                          <td className="px-3 py-2.5 text-xs text-gray-600">{x.sana}</td>
-                          <td className="px-3 py-2.5 text-xs text-right font-semibold text-gray-800">
-                            {x.summa.toLocaleString("uz-UZ")}
+                      )}
+                    </tbody>
+
+                    {/* Total row */}
+                    {xarajatlar.length > 0 && (
+                      <tfoot>
+                        <tr className="bg-blue-50 border-t-2 border-blue-200">
+                          <td colSpan={isEditing && isAdmin ? 2 : 2} className="px-3 py-2.5 text-xs font-bold text-blue-800">
+                            Jami xarajat
                           </td>
-                          <td className="px-3 py-2.5 text-xs text-gray-700">{x.izoh || <span className="text-gray-400 italic">—</span>}</td>
-                          {isEditing && isAdmin && (
-                            <td className="px-3 py-2.5">
-                              <div className="flex items-center justify-center gap-1">
-                                <button onClick={() => startEdit(x)} className="p-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition-colors">
-                                  <Edit2 size={12} />
-                                </button>
-                                <button onClick={() => deleteRow(x.id)} className="p-1 bg-red-100 hover:bg-red-200 text-red-600 rounded transition-colors">
-                                  <Trash2 size={12} />
-                                </button>
-                              </div>
-                            </td>
-                          )}
+                          <td className="px-3 py-2.5 text-sm font-bold text-blue-800 text-right">
+                            {totalSumma.toLocaleString("uz-UZ")}
+                          </td>
+                          <td colSpan={isEditing && isAdmin ? 2 : 1} className="px-3 py-2.5 text-xs text-blue-600">
+                            {formatSum(totalSumma)}
+                          </td>
                         </tr>
-                      )
-                    ))}
-
-                    {/* Add new row */}
-                    {addingNew && (
-                      <tr className="border-t border-gray-200 bg-green-50">
-                        <td className="px-3 py-2 text-xs text-gray-400">—</td>
-                        <td className="px-3 py-2">
-                          <input
-                            type="date"
-                            value={newRow.sana}
-                            onChange={e => setNewRow(r => ({ ...r, sana: e.target.value }))}
-                            className="w-full border border-green-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-green-500"
-                          />
-                        </td>
-                        <td className="px-3 py-2">
-                          <input
-                            type="number"
-                            value={newRow.summa}
-                            onChange={e => setNewRow(r => ({ ...r, summa: e.target.value }))}
-                            placeholder="0"
-                            autoFocus
-                            className="w-full border border-green-300 rounded px-2 py-1 text-xs text-right focus:outline-none focus:ring-1 focus:ring-green-500"
-                          />
-                        </td>
-                        <td className="px-3 py-2">
-                          <input
-                            type="text"
-                            value={newRow.izoh}
-                            onChange={e => setNewRow(r => ({ ...r, izoh: e.target.value }))}
-                            placeholder="Izoh (masalan: transport, ta'minat...)"
-                            className="w-full border border-green-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-green-500"
-                          />
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex items-center justify-center gap-1">
-                            <button onClick={saveNew} disabled={!newRow.summa} className="p-1 bg-green-200 hover:bg-green-300 text-green-700 rounded disabled:opacity-40">
-                              <Save size={13} />
-                            </button>
-                            <button onClick={cancelAdd} className="p-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded">
-                              <XCircle size={13} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
+                      </tfoot>
                     )}
-                  </tbody>
-
-                  {/* Total row */}
-                  {xarajatlar.length > 0 && (
-                    <tfoot>
-                      <tr className="bg-blue-50 border-t-2 border-blue-200">
-                        <td colSpan={isEditing && isAdmin ? 2 : 2} className="px-3 py-2.5 text-xs font-bold text-blue-800">
-                          Jami xarajat
-                        </td>
-                        <td className="px-3 py-2.5 text-sm font-bold text-blue-800 text-right">
-                          {totalSumma.toLocaleString("uz-UZ")}
-                        </td>
-                        <td colSpan={isEditing && isAdmin ? 2 : 1} className="px-3 py-2.5 text-xs text-blue-600">
-                          {formatSum(totalSumma)}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  )}
-                </table>
-              </div>
-            )}
-          </div>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">

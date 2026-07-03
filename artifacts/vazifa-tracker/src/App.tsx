@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Majmua } from "./types";
-import { loadData, saveData } from "./utils/storage";
+import { loadData, saveData, getAvailableMasullar } from "./utils/storage";
 import { foizHisoblash, rangAniqla, RANG_STYLES, RANG_ROW_BG } from "./utils/foiz";
 import { checkAdmin, logout } from "./utils/auth";
 import MajmuaModal from "./components/MajmuaModal";
@@ -8,7 +8,7 @@ import BajarilmaganPopup from "./components/BajarilmaganPopup";
 import ExportImport from "./components/ExportImport";
 import AdminLogin from "./components/AdminLogin";
 import AdminSettings from "./components/AdminSettings";
-import { Plus, Edit2, Trash2, BarChart3, CheckCircle2, AlertCircle, XCircle, User, LogOut, ShieldCheck, Settings } from "lucide-react";
+import { Plus, Edit2, Trash2, BarChart3, CheckCircle2, AlertCircle, XCircle, User, LogOut, ShieldCheck, Settings, Users } from "lucide-react";
 import type { RangTuri } from "./utils/foiz";
 
 type Filtr = "hammasi" | "ijobiy" | "qoniqarli" | "salbiy";
@@ -20,7 +20,10 @@ const HOLAT_LABEL: Record<RangTuri, { label: string; icon: React.ReactNode }> = 
 };
 
 export default function App() {
-  const [majmualar, setMajmualar] = useState<Majmua[]>([]);
+  const [availableMasullar, setAvailableMasullar] = useState<string[]>([]);
+  const [masulFilter, setMasulFilter] = useState<string>("all");
+  const [allMajmualar, setAllMajmualar] = useState<Majmua[]>([]);
+  const [majmualar, setMajmualar] = useState<Majmua[]>([]); // Filtered list for display
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Majmua | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -31,17 +34,35 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
-    setMajmualar(loadData());
+    const masullar = getAvailableMasullar();
+    setAvailableMasullar(masullar);
+    
+    const loadedMajmualar = masullar.flatMap(masul => loadData(masul));
+    setAllMajmualar(loadedMajmualar);
+
     setAdmin(checkAdmin());
   }, []);
 
+  // When filter or all data changes, update the displayed list
+  useEffect(() => {
+    if (masulFilter === "all") {
+      setMajmualar(allMajmualar);
+    } else {
+      setMajmualar(allMajmualar.filter(m => m.masul === masulFilter));
+    }
+  }, [masulFilter, allMajmualar]);
+
   function handleSave(m: Majmua) {
-    setMajmualar(prev => {
-      const exists = prev.find(x => x.id === m.id);
-      const next = exists ? prev.map(x => x.id === m.id ? m : x) : [...prev, m];
-      saveData(next);
-      return next;
-    });
+    const newAllMajmualar = allMajmualar.find(x => x.id === m.id)
+      ? allMajmualar.map(x => (x.id === m.id ? m : x))
+      : [...allMajmualar, m];
+    
+    setAllMajmualar(newAllMajmualar);
+
+    const masulToUpdate = m.masul;
+    const subsetToSave = newAllMajmualar.filter(item => item.masul === masulToUpdate);
+    saveData(masulToUpdate, subsetToSave);
+
     setModalOpen(false);
     setEditTarget(null);
   }
@@ -51,26 +72,44 @@ export default function App() {
     setModalOpen(true);
   }
 
-  function handleImport(updated: Majmua[]) {
-    setMajmualar(updated);
-    saveData(updated);
+  function handleImport(importedMajmualar: Majmua[]) {
+    const importedByMasul = importedMajmualar.reduce((acc, m) => {
+        (acc[m.masul] = acc[m.masul] || []).push(m);
+        return acc;
+    }, {} as Record<string, Majmua[]>);
+
+    const masulsInImport = Object.keys(importedByMasul);
+    const unchangedMajmualar = allMajmualar.filter(m => !masulsInImport.includes(m.masul));
+    const newAllMajmualar = [...unchangedMajmualar, ...importedMajmualar];
+    setAllMajmualar(newAllMajmualar);
+
+    for (const masul of masulsInImport) {
+        saveData(masul, importedByMasul[masul]);
+    }
   }
 
   function handleDelete(id: string) {
-    setMajmualar(prev => {
-      const next = prev.filter(x => x.id !== id);
-      saveData(next);
-      return next;
-    });
+    const itemToDelete = allMajmualar.find(x => x.id === id);
+    if (!itemToDelete) return;
+
+    const newAllMajmualar = allMajmualar.filter(x => x.id !== id);
+    setAllMajmualar(newAllMajmualar);
+    
+    const masulToUpdate = itemToDelete.masul;
+    const subsetToSave = newAllMajmualar.filter(item => item.masul === masulToUpdate);
+    saveData(masulToUpdate, subsetToSave);
+
     setDeleteId(null);
   }
 
   function handlePopupUpdate(updated: Majmua) {
-    setMajmualar(prev => {
-      const next = prev.map(m => m.id === updated.id ? updated : m);
-      saveData(next);
-      return next;
-    });
+    const newAllMajmualar = allMajmualar.map(m => m.id === updated.id ? updated : m);
+    setAllMajmualar(newAllMajmualar);
+    
+    const masulToUpdate = updated.masul;
+    const subsetToSave = newAllMajmualar.filter(item => item.masul === masulToUpdate);
+    saveData(masulToUpdate, subsetToSave);
+
     setPopupMajmua(updated);
   }
 
@@ -127,6 +166,21 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Masul Filter */}
+              <div className="flex items-center gap-2">
+                  <Users size={16} className="text-blue-300"/>
+                  <select 
+                      value={masulFilter} 
+                      onChange={(e) => setMasulFilter(e.target.value)}
+                      className="bg-[#1a3455] text-white text-sm font-medium rounded-lg border-blue-800/50 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 block w-full p-2 appearance-none"
+                  >
+                      <option value="all">Barcha mas'ullar</option>
+                      {availableMasullar.map(masul => (
+                          <option key={masul} value={masul}>{masul}</option>
+                      ))}
+                  </select>
+              </div>
+
               {/* Admin badge */}
               {admin && (
                 <div className="flex items-center gap-1.5 bg-emerald-700/40 border border-emerald-500/30 px-3 py-1.5 rounded-lg">
@@ -222,7 +276,7 @@ export default function App() {
 
       {/* Main content */}
       <div className="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
-        {majmualar.length === 0 ? (
+        {allMajmualar.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-4">
               <BarChart3 size={36} className="text-blue-500" />
@@ -245,7 +299,7 @@ export default function App() {
           <>
             {filtrlanganlar.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-2xl shadow border border-gray-200">
-                <p className="text-gray-500 font-medium">Bu filtir bo'yicha hech narsa topilmadi</p>
+                <p className="text-gray-500 font-medium">Bu filtr bo'yicha hech narsa topilmadi</p>
                 <button onClick={() => setFiltr("hammasi")} className="mt-3 text-blue-600 text-sm underline">Hammasini ko'rish</button>
               </div>
             ) : (
