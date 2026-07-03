@@ -56,7 +56,7 @@ export default function BajarilmaganPopup({ open, majmua, isAdmin, onClose, onUp
 
   function toggleDone(id: string) {
     if (!isAdmin) return;
-    const v = local.vazifalar.find(x => x.id === id);
+    const v = local?.vazifalar.find(x => x.id === id);
     if (v) updateVazifa(id, { bajarildi: !v.bajarildi });
   }
 
@@ -82,6 +82,7 @@ export default function BajarilmaganPopup({ open, majmua, isAdmin, onClose, onUp
   }
 
   function exportPdf() {
+    if (!local) return; // <-- Claude AI's FIX
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const W = pdf.internal.pageSize.getWidth();
     const margin = 15;
