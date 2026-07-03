@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { X, Plus, Edit2, Trash2, Save, XCircle, FileText, TrendingUp } from "lucide-react";
 import type { Vazifa, Xarajat } from "../types";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 
 const MOLIYAVIY_MASULLAR = ['A.Azimov', 'S.Abdikarimov', 'N.Ismatov'];
 
