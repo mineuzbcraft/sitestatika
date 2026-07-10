@@ -303,7 +303,7 @@ export default function App() {
                 <button onClick={() => setFiltr("hammasi")} className="mt-3 text-blue-600 text-sm underline">Hammasini ko'rish</button>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-2xl shadow-lg border border-gray-200 bg-white">
+              <div className="overflow-x-auto rounded-2xl shadow-lg border border-gray-200 bg-white">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-[#1e3a5f] text-white">
