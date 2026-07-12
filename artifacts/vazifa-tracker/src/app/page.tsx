@@ -1,15 +1,17 @@
+'use client';
+
 import { useState, useEffect } from "react";
-import type { Majmua } from "./types";
-import { loadData, saveData, getAvailableMasullar } from "./utils/storage";
-import { foizHisoblash, rangAniqla, RANG_STYLES, RANG_ROW_BG } from "./utils/foiz";
-import { checkAdmin, logout } from "./utils/auth";
-import MajmuaModal from "./components/MajmuaModal";
-import BajarilmaganPopup from "./components/BajarilmaganPopup";
-import ExportImport from "./components/ExportImport";
-import AdminLogin from "./components/AdminLogin";
-import AdminSettings from "./components/AdminSettings";
+import type { Majmua } from "../types";
+import { loadData, saveData, getAvailableMasullar } from "../utils/storage";
+import { foizHisoblash, rangAniqla, RANG_STYLES, RANG_ROW_BG } from "../utils/foiz";
+import { checkAdmin, logout } from "../utils/auth";
+import MajmuaModal from "../components/MajmuaModal";
+import BajarilmaganPopup from "../components/BajarilmaganPopup";
+import ExportImport from "../components/ExportImport";
+import AdminLogin from "../components/AdminLogin";
+import AdminSettings from "../components/AdminSettings";
 import { Plus, Edit2, Trash2, BarChart3, CheckCircle2, AlertCircle, XCircle, User, LogOut, ShieldCheck, Settings, Users } from "lucide-react";
-import type { RangTuri } from "./utils/foiz";
+import type { RangTuri } from "../utils/foiz";
 
 type Filtr = "hammasi" | "ijobiy" | "qoniqarli" | "salbiy";
 
@@ -19,7 +21,7 @@ const HOLAT_LABEL: Record<RangTuri, { label: string; icon: React.ReactNode }> = 
   qizil:  { label: "Salbiy",    icon: <XCircle size={14} /> },
 };
 
-export default function App() {
+export default function Page() {
   const [availableMasullar, setAvailableMasullar] = useState<string[]>([]);
   const [masulFilter, setMasulFilter] = useState<string>("all");
   const [allMajmualar, setAllMajmualar] = useState<Majmua[]>([]);
