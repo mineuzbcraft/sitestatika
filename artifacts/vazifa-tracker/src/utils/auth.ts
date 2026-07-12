@@ -1,37 +1,36 @@
-const SESSION_KEY = "vt_admin_session";
-const CRED_KEY = "vt_admin_creds";
-const DEFAULT_USER = "msrfteam1";
-const DEFAULT_PASS = "msrfteam777";
 
-function getCreds(): { username: string; password: string } {
-  try {
-    const raw = localStorage.getItem(CRED_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return { username: DEFAULT_USER, password: DEFAULT_PASS };
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  signOut,
+} from "firebase/auth";
+import type { User } from "firebase/auth"; // Import as a type
+import { auth } from "../firebase-config";
+
+// Asl login funksiyasi (Firebase bilan)
+export async function login(email: string, pass: string): Promise<User> {
+  const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+  return userCredential.user;
 }
 
-export function login(username: string, password: string): boolean {
-  const creds = getCreds();
-  if (username === creds.username && password === creds.password) {
-    sessionStorage.setItem(SESSION_KEY, "1");
-    return true;
-  }
-  return false;
+// Foydalanuvchi yaratish (hozircha ishlatilmaydi, lekin talabga binoan mavjud)
+export async function register(email: string, pass: string): Promise<User> {
+  throw new Error("Ro'yxatdan o'tish uchun adminga murojaat qiling.");
 }
 
-export function logout(): void {
-  sessionStorage.removeItem(SESSION_KEY);
+// Parolni tiklash (hozircha ishlatilmaydi)
+export async function resetPassword(email: string): Promise<void> {
+  throw new Error("Parolni tiklash uchun adminga murojaat qiling.");
 }
 
-export function checkAdmin(): boolean {
-  return sessionStorage.getItem(SESSION_KEY) === "1";
+// Tizimdan chiqish
+export async function logout(): Promise<void> {
+  await signOut(auth);
 }
 
-export function getAdminUsername(): string {
-  return getCreds().username;
-}
-
-export function updateCredentials(username: string, password: string): void {
-  localStorage.setItem(CRED_KEY, JSON.stringify({ username, password }));
+// Foydalanuvchi holatini kuzatish
+export function onAuthChange(callback: (user: User | null) => void) {
+  return onAuthStateChanged(auth, callback);
 }
