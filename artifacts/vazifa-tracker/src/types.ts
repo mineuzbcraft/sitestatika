@@ -1,27 +1,26 @@
-export interface Xarajat {
+export interface Expense {
   id: string;
-  sana: string;
-  summa: number;
-  izoh: string;
+  date: string;
+  amount: number;
+  description: string;
 }
 
-export interface Vazifa {
+export interface SubTask {
   id: string;
   nomi: string;
   bajarildi: boolean;
   manba?: string;
   pdf?: string | null;
   pdfNomi?: string;
-  batafsil?: string;
-  xarajatlar?: Xarajat[];
+  details?: string;
+  expenses?: Expense[];
 }
 
-export interface Majmua {
-  id: string;
+export interface Task {
+  id:string;
   nomi: string;
   masul: string;
   rasm: string | null;
   izoh: string;
-  vazifalar: Vazifa[];
-  createdAt: number;
+  vazifalar: SubTask[];
 }

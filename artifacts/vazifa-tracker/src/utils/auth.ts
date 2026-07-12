@@ -1,37 +1,77 @@
-const SESSION_KEY = "vt_admin_session";
-const CRED_KEY = "vt_admin_creds";
-const DEFAULT_USER = "msrfteam1";
-const DEFAULT_PASS = "msrfteam777";
 
-function getCreds(): { username: string; password: string } {
-  try {
-    const raw = localStorage.getItem(CRED_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return { username: DEFAULT_USER, password: DEFAULT_PASS };
-}
+import {
+  getAuth,
+  onAuthStateChanged,
+  User,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut
+} from "firebase/auth";
+import { auth } from "../firebase-config";
 
-export function login(username: string, password: string): boolean {
-  const creds = getCreds();
-  if (username === creds.username && password === creds.password) {
-    sessionStorage.setItem(SESSION_KEY, "1");
-    return true;
-  }
-  return false;
-}
+// Re-export User type for convenience
+export type { User };
 
-export function logout(): void {
-  sessionStorage.removeItem(SESSION_KEY);
-}
+// Listener function type
+type AuthStateListener = (user: User | null) => void;
 
-export function checkAdmin(): boolean {
-  return sessionStorage.getItem(SESSION_KEY) === "1";
-}
+// Array of listeners
+const listeners: AuthStateListener[] = [];
 
-export function getAdminUsername(): string {
-  return getCreds().username;
-}
+// Notify all listeners about an auth state change
+const notifyListeners = (user: User | null) => {
+  listeners.forEach(listener => listener(user));
+};
 
-export function updateCredentials(username: string, password: string): void {
-  localStorage.setItem(CRED_KEY, JSON.stringify({ username, password }));
-}
+// Subscribe to auth state changes
+onAuthStateChanged(auth, (user) => {
+  notifyListeners(user);
+});
+
+/**
+ * Registers a callback to be invoked when the user's auth state changes.
+ * @param callback The function to call when the auth state changes.
+ * @returns A function to unsubscribe the callback.
+ */
+export const onAuthChange = (callback: AuthStateListener): (() => void) => {
+  listeners.push(callback);
+  
+  // Immediately call with current state
+  callback(auth.currentUser);
+
+  // Return an unsubscribe function
+  return () => {
+    const index = listeners.indexOf(callback);
+    if (index > -1) {
+      listeners.splice(index, 1);
+    }
+  };
+};
+
+/**
+ * Signs in a user with email and password.
+ * @param email The user's email.
+ * @param password The user's password.
+ * @returns A promise that resolves with the user credential.
+ */
+export const login = (email: string, password: string) => {
+  return signInWithEmailAndPassword(auth, email, password);
+};
+
+/**
+ * Creates a new user with email and password.
+ * @param email The new user's email.
+ * @param password The new user's password.
+ * @returns A promise that resolves with the user credential.
+ */
+export const register = (email: string, password: string) => {
+  return createUserWithEmailAndPassword(auth, email, password);
+};
+
+/**
+ * Signs out the current user.
+ * @returns A promise that resolves when sign-out is complete.
+ */
+export const logout = () => {
+  return signOut(auth);
+};
